@@ -938,22 +938,22 @@ void doShot(GameState *game){
 
 void hud(SDL_Renderer *renderer, GameState *game){
     SDL_Color White = {255, 255, 255};  // this is the color in rgb format, maxing out all would give you the color white, and it will be your text's color
-    SDL_Surface* surfaceMessage = TTF_RenderText_Solid(game->ttf, "SCORE: 1000000000000000", White); // as TTF_RenderText_Solid could only be used on SDL_Surface then you have to create the surface first
-    SDL_Texture* Message = SDL_CreateTextureFromSurface(renderer, surfaceMessage); //now you can convert it into a texture
+    //SDL_Surface* surfaceMessage = TTF_RenderText_Solid(game->ttf, "SCORE: 1000000000000000", White); // as TTF_RenderText_Solid could only be used on SDL_Surface then you have to create the surface first
+    //SDL_Texture* Message = SDL_CreateTextureFromSurface(renderer, surfaceMessage); //now you can convert it into a texture
     SDL_Rect Message_rect; //create a rect
     Message_rect.x = 90;  //controls the rect's x coordinate
     Message_rect.y = 0; // controls the rect's y coordinte
     Message_rect.w = 300; // controls the width of the rect
     Message_rect.h = 70; // controls the height of the rect;
-    SDL_RenderCopy(renderer, Message, NULL, &Message_rect);
-    SDL_Surface* sMessage = TTF_RenderText_Solid(game->ttf, SDL_GetTicks(), White); // as TTF_RenderText_Solid could only be used on SDL_Surface then you have to create the surface first
-    SDL_Texture* M = SDL_CreateTextureFromSurface(renderer, sMessage); //now you can convert it into a texture
+    //SDL_RenderCopy(renderer, Message, NULL, &Message_rect);
+    //SDL_Surface* sMessage = TTF_RenderText_Solid(game->ttf, SDL_GetTicks(), White); // as TTF_RenderText_Solid could only be used on SDL_Surface then you have to create the surface first
+    //SDL_Texture* M = SDL_CreateTextureFromSurface(renderer, sMessage); //now you can convert it into a texture
     SDL_Rect M_rect; //create a rect
     M_rect.x = 490;  //controls the rect's x coordinate
     M_rect.y = 0; // controls the rect's y coordinte
     M_rect.w = 100; // controls the width of the rect
     M_rect.h = 70; // controls the height of the rect
-    SDL_RenderCopy(renderer, M, NULL, &M_rect);
+   // SDL_RenderCopy(renderer, M, NULL, &M_rect);
     //free(c);
 
 }
@@ -1147,20 +1147,20 @@ void loadround(GameState *game, int round){
     int kdt = SDL_GetTicks()-game->kamtic;
     int bdt = SDL_GetTicks()-game->bombertic;
     if (round == 1){
-        if (game->fightnum < 0 && fdt >= 2000){
+        if (game->fightnum < 2 && fdt >= 2000){
             game->fighter[game->fightnum].x = -10000;
             game->fighter[game->fightnum].y = random()%game->height;
             game->fighter[game->fightnum].life = 'y';
             game->fightnum += 1;
             game->fighttic = SDL_GetTicks();
-        } if (game->kamnum < 0 && kdt >= 500){
+        } if (game->kamnum < 3 && kdt >= 500){
             game->kam[game->kamnum].x = -10000;
             game->kam[game->kamnum].y = random()%game->height;
             game->kam[game->kamnum].life = 'y';
             game->kamtic = SDL_GetTicks();
             game->kamnum += 1;
         }
-        if (game->bombernum < 0 && bdt >= 1000){
+        if (game->bombernum < 3 && bdt >= 1000){
             int dt = (random()%4);
             if (dt == 0){
                 dt+=1;
@@ -1360,7 +1360,7 @@ void load(GameState *game, SDL_Renderer *renderer,  char *path, Mix_Music *space
     SDL_FreeSurface(bigass_im);
 }
 
-void alive(GameState *game){
+int alive(GameState *game){
     int fnum = 0;
     int knum = 0;
     int bnum = 0;
@@ -1375,6 +1375,10 @@ void alive(GameState *game){
             bnum += 1;
         }
     }
+    if(game->man.life != 'y'){
+     return 1;
+    }
+    return 0;
     printf("Fighters: %d\n", fnum);
     printf("Kams: %d\n", knum);
     printf("Bombers: %d\n", bnum);
@@ -1383,7 +1387,7 @@ void alive(GameState *game){
 int main(int argc, char *argv[]){
     char *path = argv[0];
     //change to 10 so it can excute in the same dictorary as the image
-    path[strlen(path)-28] = 0;
+    path[strlen(path)-10] = 0;
     GameState gameSate;
     gameSate.height = 720;
     gameSate.width = 1080;
@@ -1419,13 +1423,15 @@ int main(int argc, char *argv[]){
     int done = 0;
     int round = 1;
     while (!done){
+        
         loadround(&gameSate, round);
         done = processEvents(window, &gameSate);
+        done = alive(&gameSate);
         collison(&gameSate, ex, aex);
         doRender(renderer, &gameSate);
         doShot(&gameSate);
         moveEnemy(&gameSate);
-        alive(&gameSate);
+        
     }
     Mix_FreeChunk(ex);
     Mix_FreeMusic(boss);
